@@ -10,20 +10,27 @@ import tornado.web
 from tornado.options import define, options
 
 define("port", default=9988, help="run on the given port")
+define("upload_path", default="/data/web/upload/", help="upload path")
 
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
-        self.render("index.html")
+        dirs = os.listdir(options.upload_path)
+        files = []
+        for file_name in dirs:
+            if os.path.isfile(options.upload_path + file_name):
+                files.append(file_name)
+                
+        self.render("index.html", files=files)
     
     def post(self):
         file_dict_list = self.request.files['file']
         for file_dict in file_dict_list:
             filename = file_dict["filename"]
-            f = open("/data/web/upload/%s" % filename, "wb")
+            f = open(options.upload_path + filename, "wb")
             f.write(file_dict["body"])
             f.close()
         self.redirect("/")
-
+        
 class Application(tornado.web.Application):
     def __init__(self):
         settings = dict(
@@ -35,7 +42,9 @@ class Application(tornado.web.Application):
                         autoescape=None,
                         debug=True,
                      )   
-        super(Application, self).__init__([(r"/", MainHandler)], **settings)
+        super(Application, self).__init__([(r"/", MainHandler),
+                                           (r"/download/(.*)", tornado.web.StaticFileHandler, {"path": options.upload_path}),
+                                           ], **settings)
 
 def main():
     tornado.options.options.log_file_prefix = r"web.log"

@@ -5,9 +5,19 @@
         <title>文件上传</title>
     </head>
     <body>
+    	<div style="margin-bottom: 20px;">
         <form action="/" enctype="multipart/form-data" method="post">
             <input name="file" type="file">
             <input type="submit" value="Submit">
         </form>
+        </div>
+       <div>
+       	文件列表,点击可下载:
+       	<ul>
+		{% for file in files %}       		
+			<li><a href="/download/{{file}}">{{ file }}</a></li>       		
+       	{% end%}
+       	</ul>
+       </div>
     </body>
 </html>
