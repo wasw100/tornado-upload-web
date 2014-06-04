@@ -12,6 +12,7 @@ from tornado.options import define, options
 define("port", default=9988, help="run on the given port")
 define("upload_path", default="/data/web/upload/", help="upload path")
 
+
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
         dirs = os.listdir(options.upload_path)
@@ -30,21 +31,25 @@ class MainHandler(tornado.web.RequestHandler):
             f.write(file_dict["body"])
             f.close()
         self.redirect("/")
-        
+ 
+
 class Application(tornado.web.Application):
     def __init__(self):
         settings = dict(
-                        template_path=os.path.join(os.path.dirname(__file__), "templates"),
-                        static_path=os.path.join(os.path.dirname(__file__), "static"),
-                        xsrf_cookies=False,
-                        cookie_secret="noneed",
-                        login_url="/login",
-                        autoescape=None,
-                        debug=True,
-                     )   
-        super(Application, self).__init__([(r"/", MainHandler),
-                                           (r"/download/(.*)", tornado.web.StaticFileHandler, {"path": options.upload_path}),
-                                           ], **settings)
+            template_path=os.path.join(os.path.dirname(__file__), "templates"),
+            static_path=os.path.join(os.path.dirname(__file__), "static"),
+            xsrf_cookies=False,
+            cookie_secret="noneed",
+            login_url="/login",
+            autoescape=None,
+            debug=True,
+        )
+        handlers = [
+            (r"/", MainHandler),
+            (r"/download/(.*)", tornado.web.StaticFileHandler, {"path": options.upload_path}),
+        ]
+        super(Application, self).__init__(handlers, **settings)
+
 
 def main():
     tornado.options.options.log_file_prefix = r"web.log"
@@ -56,6 +61,8 @@ def main():
     http_server.listen(options.port)
     tornado.ioloop.IOLoop.instance().start()
 
+
 if __name__ == "__main__":
+    print ("Starting HTTP proxy on port %d" % options.port)
     main()
 
