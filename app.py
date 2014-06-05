@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import os
@@ -63,6 +64,10 @@ def main():
 
 
 if __name__ == "__main__":
-    print ("Starting HTTP proxy on port %d" % options.port)
-    main()
+    print "upload path: %s" % options.upload_path
+    if not os.path.isdir(options.upload_path):
+        print "dir-%s not exist" % options.upload_path
+    else:
+        print "Starting HTTP proxy on port %d" % options.port
+        main()
 
